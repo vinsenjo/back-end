@@ -73,11 +73,54 @@ export const deleteUser = (req: Request, res: Response) => {
   }
 };
 
-// export const editUser = (req:Request,res:Response)=>{
-//   const users: IUser[] = JSON.parse(
-//     fs.readFileSync("./src/data/users.json", "utf-8")
-//   );
-//   const { id } = req.params;
-//   const idx = users.find((item) => item.id == parseInt(id));
-//   const edit = 
-// }
+export const editUser = (req: Request, res: Response) => {
+  const users: IUser[] = JSON.parse(
+    fs.readFileSync("./src/data/users.json", "utf-8")
+  );
+  const idx = users.findIndex((item) => item.id == parseInt(req.params.id));
+  users[idx] = { ...users[idx], ...req.body };
+
+  if (idx < 0) {
+    res.status(400).send({
+      status: "Error !",
+      message: "User Not Found",
+    });
+  }
+
+  fs.writeFileSync("./src/data/users.json", JSON.stringify(users), "utf-8");
+  res.status(200).send({
+    status: "OKE",
+    message: "User Edited",
+  });
+};
+
+export const editUserAll = (req: Request, res: Response) => {
+  const users: IUser[] = JSON.parse(
+    fs.readFileSync("./src/data/user.json", "utf-8")
+  );
+
+  const idx = users.findIndex((item) => item.id == parseInt(req.params.id));
+
+  const newUser: IUser = { id: users[idx].id, ...req.body };
+  if (!newUser.name || !newUser.age) {
+    res.status(400).send({
+      status: "error",
+      message: "user must have name and age",
+    });
+  } else {
+    users[idx] = newUser;
+    fs.writeFileSync("./src/data/user.json", JSON.stringify(users), "utf-8");
+    console.log(newUser);
+
+    if (idx < 0) {
+      res.status(404).send({
+        status: "error",
+      });
+    }
+
+    res.status(200).send({
+      status: "Success",
+      message: "User All Edited",
+    });
+  }
+};
