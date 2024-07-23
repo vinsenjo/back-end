@@ -37,8 +37,9 @@ export const createUser = (req: Request, res: Response) => {
   const id = Math.max(...users.map((item) => item.id)) + 1;
   const newUser = {
     id,
-    name: req.body.name,
-    age: req.body.age,
+    username: req.body.username,
+    email: req.body.email,
+    password: req.body.password,
   };
   users.push(newUser);
   console.log(users);
@@ -94,33 +95,57 @@ export const editUser = (req: Request, res: Response) => {
   });
 };
 
-export const editUserAll = (req: Request, res: Response) => {
+// export const editUserAll = (req: Request, res: Response) => {
+//   const users: IUser[] = JSON.parse(
+//     fs.readFileSync("./src/data/user.json", "utf-8")
+//   );
+
+//   const idx = users.findIndex((item) => item.id == parseInt(req.params.id));
+
+//   const newUser: IUser = { id: users[idx].id, ...req.body };
+//   if (!newUser.name || !newUser.age) {
+//     res.status(400).send({
+//       status: "error",
+//       message: "user must have name and age",
+//     });
+//   } else {
+//     users[idx] = newUser;
+//     fs.writeFileSync("./src/data/user.json", JSON.stringify(users), "utf-8");
+//     console.log(newUser);
+
+//     if (idx < 0) {
+//       res.status(404).send({
+//         status: "error",
+//       });
+//     }
+
+//     res.status(200).send({
+//       status: "Success",
+//       message: "User All Edited",
+//     });
+//   }
+// };
+
+export const loginUser = (req: Request, res: Response) => {
   const users: IUser[] = JSON.parse(
-    fs.readFileSync("./src/data/user.json", "utf-8")
+    fs.readFileSync("./src/data/users.json", "utf-8")
   );
-
-  const idx = users.findIndex((item) => item.id == parseInt(req.params.id));
-
-  const newUser: IUser = { id: users[idx].id, ...req.body };
-  if (!newUser.name || !newUser.age) {
-    res.status(400).send({
-      status: "error",
-      message: "user must have name and age",
-    });
-  } else {
-    users[idx] = newUser;
-    fs.writeFileSync("./src/data/user.json", JSON.stringify(users), "utf-8");
-    console.log(newUser);
-
-    if (idx < 0) {
-      res.status(404).send({
-        status: "error",
-      });
-    }
-
-    res.status(200).send({
-      status: "Success",
-      message: "User All Edited",
+  const user = users.find((item) => item.email == req.body.email);
+  if (!user) {
+    return res.status(400).send({
+      status: "ERROR",
+      msg: "user not found",
     });
   }
+  if (user.password !== req.body.password) {
+    return res.status(400).send({
+      status: "ERROR",
+      msg: "Incorrect Password",
+    });
+  }
+  res.status(200).send({
+    status: "OK",
+    msg: "login success",
+    user,
+  });
 };
